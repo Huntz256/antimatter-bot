@@ -58,8 +58,10 @@ inline void World::getCandidates(std::unordered_set<int> &C) const
             for (int i0 = i-2; i0 <= i+2; i0++)
                 for (int j0 = j-2; j0 <= j+2; j0++)
                 {
-                    if (!get(i0, j0)) // exclude live cells
-                        C.insert(i0*Width + j0);
+                    int i1 = (i0 + Height) % Height;
+                    int j1 = (j0 + Width)  % Width;
+                    if (!get(i1, j1)) // exclude live cells
+                        C.insert(i1*Width + j1);
                 }
         }
     }
