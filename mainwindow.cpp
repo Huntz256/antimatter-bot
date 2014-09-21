@@ -15,9 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->webView->settings()->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
     ui->webView->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-
-  //  ui->webView->load(QUrl(QString("http://lifecompetes.com/?token=943d72bd7281e5dfca2182ef0d7d81023851v3")));
-  //  ui->webView->load(QUrl(QString("http://lifecompetes.com/?token=808e2059df6755291d9f6dfd810c52652934v3")));
 }
 
 MainWindow::~MainWindow()
