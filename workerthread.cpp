@@ -33,6 +33,7 @@ void WorkerThread::run()
     std::atomic<int> Min(Width*Height + 99);
     std::atomic<int> iMin(0);
 
+    // FIXME: datarace here (Min, iMin)
     #pragma omp parallel for
     for (int i = 0; i < (int)m_Canditates.size(); i++)
     {
