@@ -27,6 +27,13 @@
       <item>
        <widget class="QLineEdit" name="lineAddress"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushGo">
+        <property name="text">
+         <string>Go</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

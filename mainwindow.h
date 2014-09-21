@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "workerthread.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -19,12 +21,12 @@ private:
     Ui::MainWindow *ui;
     bool m_BotIsRunning = false;
     int m_iTimer = 0;
+    WorkerThread m_Thread;
 
     void timerEvent(QTimerEvent *);
-
-private slots:
+    void onMoveReady(int x, int y, QString State);
     void onSwitchBot();
-
+    void onGo();
 };
 
 #endif // MAINWINDOW_H

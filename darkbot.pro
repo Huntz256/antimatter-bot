@@ -10,12 +10,25 @@ TARGET = darkbot
 TEMPLATE = app
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    world.cpp \
+    workerthread.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    world.h \
+    workerthread.h
 
 FORMS    += mainwindow.ui
 
 RESOURCES += resource.qrc
 
-QMAKE_CXXFLAGS += -std=c++11
+gcc {
+    QMAKE_CXXFLAGS += -std=c++11 -fopenmp
+    QMAKE_CXXFLAGS_RELEASE += -O3
+    QMAKE_LFLAGS +=  -fopenmp
+}
+
+msvc {
+    QMAKE_CXXFLAGS += /openmp
+    QMAKE_CXXFLAGS_RELEASE += /O2
+}

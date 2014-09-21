@@ -12,5 +12,5 @@ function gridToString()
 }
 function place(i, j)
 {
-   app.gameClient.placeLiveCells([app.renderer.grid.getCell(i % 100, j % 50)]);
+   app.gameClient.placeLiveCells([app.renderer.grid.getCell((i + 100) % 100, (j + 50) % 50)]);
 }
