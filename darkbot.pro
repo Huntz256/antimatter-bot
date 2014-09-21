@@ -11,7 +11,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    world.cpp \
     workerthread.cpp
 
 HEADERS  += mainwindow.h \
