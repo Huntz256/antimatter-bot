@@ -30,8 +30,13 @@ void WorkerThread::run()
     for (int c : m_CandidatesSet)
         m_Canditates.push_back(c);
 
-    std::atomic<int> Min(Width*Height + 99);
-    std::atomic<int> iMin(0);
+    std::atomic<int> Min;
+    std::atomic<int> iMin(-1);
+
+    World TestWorld = world;
+    for (int j = 0; j < 5; j++)
+        TestWorld.next();
+    Min = TestWorld.count();
 
     // FIXME: datarace here (Min, iMin)
     #pragma omp parallel for
@@ -52,5 +57,6 @@ void WorkerThread::run()
         }
     }
 
-    emit ready(iMin % Width, iMin / Width, m_State);
+    if (iMin != -1)
+        emit ready(iMin % Width, iMin / Width, m_State);
 }
