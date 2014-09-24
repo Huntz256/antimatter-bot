@@ -1,5 +1,4 @@
-#include <atomic>
-
+#include <omp.h>
 #include "workerthread.h"
 #include "world.h"
 
@@ -30,33 +29,52 @@ void WorkerThread::run()
     for (int c : m_CandidatesSet)
         m_Canditates.push_back(c);
 
-    std::atomic<int> Min;
-    std::atomic<int> iMin(-1);
+    const int iNumThreads = omp_get_num_threads();
 
-    World TestWorld = world;
-    for (int j = 0; j < 5; j++)
-        TestWorld.next();
-    Min = TestWorld.count();
+    int Min[20];
+    int iMin[20];
 
-    // FIXME: datarace here (Min, iMin)
-    #pragma omp parallel for
-    for (int i = 0; i < (int)m_Canditates.size(); i++)
+    for (int i = 0; i < iNumThreads; i++)
     {
-        int iCandidate = m_Canditates[i];
+        Min[i] = world.count();
+        iMin[i] = -1;
+    }
+
+    #pragma omp parallel for
+    for (int k = 0; k < (int)m_Canditates.size(); k++)
+    {
+        int iCandidate = m_Canditates[k];
+        int i0 = iCandidate / Width;
+        int j0 = iCandidate % Width;
 
         World TestWorld = world;
-        TestWorld.set(iCandidate / Width, iCandidate % Width, true);
+        TestWorld.set(0, i0, j0, true);
 
-        for (int j = 0; j < 5; j++)
-            TestWorld.next();
-        int Count = TestWorld.count();
-        if (Count < Min)
+        for (int t = 1; t < Interval; t++)
         {
-            Min = Count;
-            iMin = iCandidate;
+            for (int i = i0 - t; i <= i0 + t; i++)
+                for (int j = j0 - t; j <= j0 + t; j++)
+                    TestWorld.simulate(t, i, j);
+        }
+
+        int iThread = omp_get_thread_num();
+        int Count = TestWorld.count();
+        if (Count < Min[iThread])
+        {
+            Min[iThread] = Count;
+            iMin[iThread] = iCandidate;
         }
     }
 
-    if (iMin != -1)
-        emit ready(iMin % Width, iMin / Width, m_State);
+    for (int i = 1; i < iNumThreads; i++)
+    {
+        if (Min[i] < Min[0])
+        {
+            Min[0] = Min[i];
+            iMin[0] = iMin[i];
+        }
+    }
+
+    if (iMin[0] != -1)
+        emit ready(iMin[0] % Width, iMin[0] / Width, m_State);
 }

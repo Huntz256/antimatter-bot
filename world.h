@@ -7,40 +7,43 @@
 
 static const int Height = 50;
 static const int Width = 100;
+static const int Interval = 20;
 
 class World
 {
-    bool m_State = false;
-    std::bitset<Width*Height> m_Map[2];
+    std::bitset<Width> m_Map[Interval][Height];
 
-    bool get(int i, int j) const;
+    bool get(int t, int i, int j) const;
 
 public:
 
     void set(const QString& Str);
+    void set(int t, int i, int j, bool state);
     void getCandidates(std::unordered_set<int>& C) const;
-    void next();
+    void simulate(int t, int i, int j);
     int count() const;
-
-    void set(int i, int j, bool state, bool Next = false);
 };
 
 inline void World::set(const QString& Str)
 {
-    for (int i = 0; i < Width*Height; i++)
-    {
-        m_Map[m_State][i] = Str[i] == '1';
-    }
+    for (int i = 0; i < Height; i++)
+        for (int j = 0; j < Width; j++)
+            m_Map[0][i][j] = Str[i*Width + j] == '1';
+
+    for (int t = 1; t < Interval; t++)
+        for (int i = 0; i < Height; i++)
+            for (int j = 0; j < Width; j++)
+                simulate(t, i, j);
 }
 
-inline bool World::get(int i, int j) const
+inline bool World::get(int t, int i, int j) const
 {
-    return m_Map[m_State][((i + Height) % Height)*Width + ((j + Width) % Width)];
+    return m_Map[t][(i + Height) % Height][(j + Width) % Width];
 }
 
-inline void World::set(int i, int j, bool state, bool Next)
+inline void World::set(int t, int i, int j, bool state)
 {
-    m_Map[m_State ^ Next][((i + Height) % Height)*Width + ((j + Width) % Width)] = state;
+    m_Map[t][(i + Height) % Height][(j + Width) % Width] = state;
 }
 
 inline void World::getCandidates(std::unordered_set<int> &C) const
@@ -51,7 +54,7 @@ inline void World::getCandidates(std::unordered_set<int> &C) const
     {
         for (int j = 0; j < Width; j++)
         {
-            if (!get(i, j))
+            if (!get(0, i, j))
                 continue;
 
             // add all cells in 2-range as potential candidates
@@ -60,34 +63,29 @@ inline void World::getCandidates(std::unordered_set<int> &C) const
                 {
                     int i1 = (i0 + Height) % Height;
                     int j1 = (j0 + Width)  % Width;
-                    if (!get(i1, j1)) // exclude live cells
+                    if (!get(0, i1, j1)) // exclude live cells
                         C.insert(i1*Width + j1);
                 }
         }
     }
 }
 
-inline void World::next()
+inline void World::simulate(int t, int i, int j)
 {
-    m_Map[!m_State].reset();
-
-    for (int i = 0; i < Height; i++)
-    {
-        for (int j = 0; j < Width; j++)
-        {
-            int n = get(i-1, j-1) + get(i-1, j+1) + get(i+1, j-1) + get(i+1, j+1) + get(i, j-1) + get(i-1, j) + get(i+1, j) + get(i, j+1);
-            bool alive = get(i, j);
-            if (alive && (n == 2 || n == 3))
-                set(i, j, true, true);
-            if (!alive && (n == 3))
-                set(i, j, true, true);
-        }
-    }
-
-    m_State = !m_State;
+    int n = get(t-1, i-1, j-1) + get(t-1, i-1, j+1) + get(t-1, i+1, j-1) + get(t-1, i+1, j+1) + get(t-1, i, j-1) + get(t-1, i-1, j) + get(t-1, i+1, j) + get(t-1, i, j+1);
+    bool alive = get(t-1, i, j);
+    if (alive && (n == 2 || n == 3))
+        set(t, i, j, true);
+    else if (!alive && (n == 3))
+        set(t, i, j, true);
+    else
+        set(t, i, j, false);
 }
 
 inline int World::count() const
 {
-    return (int)m_Map[m_State].count();
+    int sum = 0;
+    for (int i = 0; i < Height; i++)
+        sum += (int)m_Map[Interval-1][i].count();
+    return sum;
 }

@@ -70,7 +70,7 @@ void MainWindow::onSwitchBot()
     if (m_BotIsRunning)
     {
         ui->pushSwitchBot->setText("Stop bot");
-        m_iTimer = startTimer(500);
+        m_iTimer = startTimer(300);
     }
     else
     {
